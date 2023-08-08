@@ -31,7 +31,7 @@ To run the interactive Quarto project, follow these steps:
 
 Our Quarto project features two interactive visualizations:
 
-1. **Descriptive Statistics:** In this section, you can customize the conditions for viewing descriptive statistics. Choose between table (default) or graph format.
+1. **Descriptive Statistics:** In this section, you can choose between the different variables for viewing descriptive statistics. Choose between table (default) or graph format.
 
 <img width="517" alt="image" src="https://github.com/OrHalevi1/DataScienceFinalAssignment/assets/128979539/bd2b0416-afdd-4ff6-88e4-94d9f96e7968">
 
