@@ -1,0 +1,338 @@
+---
+title: "Final Assignment"
+author: "Yael Shoham & Or Halevi"
+format: html
+output:
+  rmdformats::material:
+    highlight: kate
+runtime: shiny
+---
+
+# Background
+
+## Do politicians of political outgroups elicit moral disgust?
+
+### The effect of color on the elicitation of disgust toward politicians of political outgroups
+
+Recent research (Landy et al., 2023) argues that members of political outgroups elicit core (physical) disgust, as distinct from moral disgust. In a recent research Moran and Eyal (in preparation) tested whether members of political outgroups elicit moral disgust rather than core (physical) disgust using more sensitive and valid measures than those used by Landy et al (2023). These measures were based on research by Moran et al. (2021), that has demonstrated that different levels of construal are involved in the elicitation of core disgust and moral disgust. Specifically, the elicitation of core disgust involves more concrete than abstract construal, while the elicitation of moral disgust involves more abstract than concrete construal. Consequently, the study concluded that changing the level at which the elicited situation is construed has a different effect on the intensity of core disgust and moral disgust.
+
+For example, in one of the studies, Moran et al. (2021) manipulated the level of construal of a disgusting object by displaying its image either in color (low-level construal) or in black and white (BW; high-level construal). This manipulation was based on a study that found that BW (vs. color) imagery promotes abstract (vs. concrete) construal (Lee et al., 2014). The study found that images elicited more intense disgust when presented in color than in BW. However, this effect of color on disgust intensity was less pronounced for images depicting moral disgust.
+
+Moran and Eyal (in preparation) tested whether the effect of BW (vs. color) imagery on the intensity of disgust elicited by political outgroup members is more similar to the effect of BW (vs. color) imagery on the intensity of core disgust or more similar to the effect of BW (vs. color) imagery on the intensity of moral disgust. They found the later and concluded that political outgroup members elicit moral disgust rather than physical disgust.
+
+In the current research, we examined whether Moran and Eyal's findings are replicated when the objects of disgust are familiar politicians from the political out-group rather than anonymous group members.
+
+**Bibliography:**
+
+Landy, J. F., Rottman, J., Batres, C., & Leimgruber, K. L. (2023). Disgusting democrats and repulsive republicans: Members of political outgroups are considered physically gross. *Personality and Social Psychology Bulletin*, *49*(3), 361-375.
+
+Lee, H., Deng, X., Unnava, H. R., & Fujita, K. (2014). Monochrome forests and colorful trees: The effect of black-and-white versus color imagery on construal level. *Journal of Consumer Research*, *41*, 1015--1032. http://dx.doi.org/10.1086/678392
+
+Moran, T., Bornstein, O., & Eyal, T. (2021). The level of construal involved in the elicitation of core versus moral disgust. Emotion, 21(2), 391.
+
+# Method
+
+### Participants
+
+600 participants (300 Democrat and 300 Republican) completed the study. We excluded 30 participants with inconsistent political identification (14 Democrat and 16 Republican).
+
+The final sample includes 570 (286 Democrat and 284 Republican) participants (Democrat: Mage = 35.5, SD = 10.8, 52% women; Republican: Mage = 48.2, SD = 116.2, 40% women; all: Mage = 41.8, SD = 82.6, 46% women)
+
+### Procedure
+
+Pictures eliciting either core disgust, moral disgust, or pictures of political out-group politicians' (manipulated between participants), was presented in color and in BW (manipulated within participants) in random order. For each picture, participants rated how disgusting the image is on a scale from 0 (not at all) to 100 (very much). At the end of the study, participants indicate their political orientation.
+
+### Materials
+
+In the political out-group politicians' condition, American participants identified in Prolific prescreening as Liberals will be presented with 10 pictures (5 pictures presented once in color and once in BW) of politicians from the Republican party with the name and the symbol of the party. Participants identified in Prolific prescreening as Conservatives will be presented with 10 pictures of politicians from the Democratic party with the name and the symbol of the party. In the core disgust condition, we will present 10 pictures (5 pictures presented once in color and once in BW). In the moral disgust condition, we will present 10 pictures (5 pictures presented once in color and once in BW).
+
+# Analysis
+
+## Descriptive statistics
+
+#### Ratings as a function of disgust category, construal level, and political affiliation:
+
+To view the descriptive statistics for the various conditions, choose the appropriate option from the 'Select Variable' menu. If you wish to visualize the data using graphs, simply click on 'Show as Graph'.
+
+ - `var`: Whether the images are displayed in black-and-white or in color.
+ - `cond`: The type of disgust this image raises (core disgust, moral disgust, or political disgust).
+ - `Pol_ok`: Political orientation, DEM for Democrats, REP for Republicans.
+
+```{r setup, include=FALSE}
+#| results='hide'
+library(base)
+library(tidyverse)
+library(psy)
+library(doBy)
+library(plyr)
+library(dplyr)
+library(rstatix)
+library(effsize)
+library(BayesFactor)
+library(ez)
+library(schoRsch)
+library(knitr)
+library(rmdformats)
+library(afex)
+library(emmeans)
+library(ggeffects)
+library(shiny)
+library(ggplot2)
+library(afex)
+library(emmeans)
+library(ggeffects)
+library(data.table)
+options(shiny.useragg = FALSE)
+#update.packages(ask = FALSE, checkBuilt = TRUE)
+```
+
+```{r ex_inputs}
+#| eval=TRUE,
+#| echo=FALSE
+
+#upload functions
+source("helper_function.R")
+
+#read all files 
+all <- read.csv("all.csv")
+all$diff <- all$color - all$bw
+```
+
+```{r section1, warning=FALSE, messages=FALSE}
+#| eval=TRUE,
+#| echo=FALSE
+
+myTheme <- theme(
+            plot.title = element_text(family = 'serif', size = 18, color = "#004C4F", face = "bold"),
+                plot.subtitle = element_text(family = 'serif', size = 12, color = "#004C4F"),
+            axis.text = element_text(family = 'serif', size = 16, color = "#004C4F"),
+            axis.title = element_text(family = 'serif', size = 18, color = "#004C4F", face = "bold"),
+            strip.text = element_text(family = 'serif', size = 12, color = "#004C4F"),
+            legend.title = element_text(family = 'serif', size = 14, color = "#004C4F", face = "bold"),
+            legend.text = element_text(family = 'serif', size = 12, color = "#004C4F"),
+            panel.background = element_rect(fill = "#F5F5F5"),
+            plot.background = element_rect(fill = "#F5F5F5"),
+            legend.background = element_rect(fill = "#F5F5F5")
+        )
+  
+  
+baseTableColor <- mysumBy(as.formula(paste("color ~ cond")), dt = all, bindTables = TRUE)
+baseTableBw <- mysumBy(as.formula(paste("bw ~ cond")), dt = all, bindTables = TRUE)
+baseTableBwColor <- mysumBy(as.formula(paste("color + bw ~ cond")), dt = all, bindTables = TRUE)
+
+
+ui <- fluidPage(
+  titlePanel("Ratings as a function of disgust category, construal, and political affiliation Table"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("var", "Select Variable:", c("color", "bw", "color + bw")),
+      checkboxInput("show_graph", "Show as graph", value = FALSE)
+    ),
+    mainPanel(
+      tableOutput("table1"),
+      tableOutput("table2"),
+      plotOutput("plot1")
+    )
+  )
+)
+
+server <- function(input, output) {
+  source("helper_function.R")
+  
+  output$table1 <- renderTable({
+    dt <- all 
+    if (!input$show_graph) {
+      mysumBy(as.formula(paste(input$var, "~ cond")), dt = dt, bindTables = TRUE)
+    }
+  })
+  
+  output$table2 <- renderTable({
+    dt <- all
+    if (!input$show_graph) {
+      mysumBy(as.formula(paste(input$var, "~ pol_ok + cond")), dt = dt, bindTables = TRUE)
+    }
+  })
+  
+  output$plot1 <- renderPlot({
+    dt <- all
+    if (input$show_graph) {
+      
+      if (input$var == "color"){
+        ggplot(baseTableColor, aes(x = cond, y = M)) +
+              geom_bar(stat = "identity", position = "dodge", fill = "#009AA1") +
+              labs(title = "COLOR", x = "Conditions", y = "Disgust Rating") +
+              myTheme
+      }
+      else if (input$var == "bw"){
+        ggplot(baseTableBw, aes(x = cond, y = M)) +
+              geom_bar(stat = "identity", position = "dodge", fill = "#88D6D8") +
+              labs(title = "BW", x = "Conditions", y = "Disgust Rating") +
+              myTheme
+      }
+      else if (input$var == "color + bw"){
+        ggplot(baseTableBwColor, aes(x = cond, y = M, fill = var)) +
+              geom_bar(stat = "identity", position = "dodge") +
+                scale_fill_manual(values=c("#88D6D8",
+                                           "#009AA1" ))+
+              labs(title = "COLOR + BW", x = "Conditions", y = "Disgust Rating") +
+              myTheme
+
+      }
+    }
+    else {
+      # Empty
+    }
+ })
+}
+
+shinyApp(ui, server)
+```
+
+## ANOVA Analysis
+
+1.  For each condition -- we compute the difference between the rating of colorful pictures and the ratings of BW pictures (by subtracting the BW pictures ratings from the colorful pictures ratings).
+2.  These difference scores submitted to a 3 (disgust condition: core, moral, politician's outgroup) one-way ANOVA. A significant main effect will be further analyzed by specific comparisons:
+    -   Core vs. Moral
+
+    -   Core vs. Politician's outgroup
+
+    -   Moral vs. Politician's outgroup
+
+If Landy et al's (2021) argument is correct, we expect to see this specific pattern: Core = Politician's outgroup \> Moral
+
+If, however, political outgroup members elicit moral disgust rather than physical disgust, we expect to see this specific patter: Core \> Moral = Politician's outgroup
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+all$cond <- factor(all$cond, levels = c('core', 'moral', 'polit'))
+all$pol_ok <- factor(all$pol_ok, levels = c('DEM', 'REP'))
+```
+
+```{r, warning=FALSE, messages=FALSE, echo=FALSE}
+#| results='hide'
+
+ANOVA3 <- aov_ez('prolific_id', 'diff', all,
+                     within =,
+                     between = c('cond', 'pol_ok'),
+                     anova_table = list(es = "pes"))
+```
+
+```{r, echo=FALSE, results='asis'}
+# Create a table for ANOVA results
+ANOVA3_table <- data.frame(
+  Effect = c("cond", "pol_ok", "cond:pol_ok"),
+  df = c("2, 564", "1, 564", "2, 564"),
+  MSE = c("38.76", "38.76", "38.76"),
+  F = c("153.83 ***", "18.96 ***", "9.68 ***"),
+  pes = c(".353", ".033", ".033"),
+  p_value = c("<.001", "<.001", "<.001")
+)
+
+cat("<table style='border-collapse: collapse; width: 100%;'>\n")
+cat("<tr>\n")
+for (col_name in names(ANOVA3_table)) {
+  cat("<th style='border: 1px solid black; padding: 8px; text-align: center;'>", col_name, "</th>\n")
+}
+cat("</tr>\n")
+
+for (i in 1:nrow(ANOVA3_table)) {
+  cat("<tr>\n")
+  for (col_value in ANOVA3_table[i,]) {
+    cat("<td style='border: 1px solid black; padding: 8px; text-align: center;'>", col_value, "</td>\n")
+  }
+  cat("</tr>\n")
+}
+
+cat("</table>")
+```
+
+To view the graph in full size, simply click on it:
+
+```{r, warning=FALSE, messages=FALSE}
+#| eval=TRUE,
+#| echo=FALSE
+
+# plot
+ggemmeans(ANOVA3, c("cond", "pol_ok")) |>
+  plot(connect.lines = TRUE, color = c("#88D6D8", "#009AA1")) +
+  labs(title="ANOVA analysis of differences \nbetween bw VS. color images", subtitle = "Considering the within-subjects variable of cond (core/moral/polit) \nand the between-subjects variable of pol_ok (DEM/REP)") +
+  theme(
+    plot.title = element_text(family = 'serif', size = 16, color = "#004C4F", face = "bold"),
+        plot.subtitle = element_text(family = 'serif', size = 12, color = "#004C4F"),
+    axis.text = element_text(family = 'serif', size = 10, color = "#004C4F"),
+    axis.title = element_text(family = 'serif', size = 12, color = "#004C4F", face = "bold"),
+    strip.text = element_text(family = 'serif', size = 12, color = "#004C4F"),
+    legend.title = element_text(family = 'serif', size = 12, color = "#004C4F", face = "bold"),
+    legend.text = element_text(family = 'serif', size = 10, color = "#004C4F"),
+    panel.background = element_rect(fill = "#F5F5F5"),
+    plot.background = element_rect(fill = "#F5F5F5"),
+    legend.background = element_rect(fill = "#F5F5F5")
+  )
+```
+
+To view the follow-up analyses, select the specific effect that interests you from the 'Select Effect' menu:
+
+```{r section2, warning=FALSE, messages=FALSE}
+#| eval=TRUE,
+#| echo=FALSE
+
+ANOVA3 <- aov_ez('prolific_id', 'diff', data = all,
+                   within = ,
+                   between = c('cond', 'pol_ok'),
+                   anova_table = list(es = "pes"))
+
+em_ANOVA3 <- emmeans(ANOVA3, ~ cond + pol_ok)
+
+table1 <- joint_tests(ANOVA3, by = "cond")
+table1 <- setDT(table1)
+
+table2 <- joint_tests(ANOVA3, by = "pol_ok")
+table2 <- setDT(table2)
+
+table3 <- contrast(em_ANOVA3, method = "consec", by = "pol_ok")
+table3 <- setDT(as.data.frame(table3))
+
+table4 <- contrast(em_ANOVA3, interaction = list(cond = "consec", pol_ok = "consec"))
+table4 <- setDT(as.data.frame(table4))
+
+ui <- fluidPage(
+  titlePanel("ANOVA effects and Contrast Analysis"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("effect", "Select effect:", c("simple effects cond", "simple effects pol_ok", "Contrast Analysis"))
+    ),
+    mainPanel(
+      tableOutput("table1"),
+      tableOutput("table2")
+    )
+  )
+)
+
+
+server <- function(input, output) {
+  output$table1 <- renderTable({
+    dt <- ANOVA3
+    if (input$effect == "simple effects cond") {
+      table1
+    } else if (input$effect == "simple effects pol_ok") {
+      table2
+    } else if (input$effect == "Contrast Analysis") {
+      table3
+    }
+  })
+  output$table2 <- renderTable({
+    dt <- ANOVA3
+    if(input$effect == "Contrast Analysis"){
+      table4
+    }
+  })  
+}
+
+shinyApp(ui, server)
+```
+
+# Summary
+
+We aimed to replicate and extend the findings of Moran and Eyal (in preparation) by examining whether the effect they found towards political outgroups could be reproduced towards politicians from the out-group. We used a similar experimental design as Moran and Eyal (in preparation).
+
+Our results showed a similar pattern to Moran and Eyal's study, with pictures displayed in color eliciting more intense disgust than those displayed in black and white. However, as in the previous study, the effect of color on disgust intensity was less pronounced for pictures depicting moral disgust, and politicians from the out-group. This is consistent with the hypothesis that political outgroup members tend to elicit moral disgust rather than physical disgust.
